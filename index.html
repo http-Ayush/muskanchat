@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Muskan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f0c20 0%, #15102a 50%, #060210 100%);
+            --panel-bg: rgba(25, 18, 52, 0.45);
+            --panel-border: rgba(255, 105, 180, 0.15);
+            --primary-pink: #ff4fa8;
+            --primary-purple: #8a2be2;
+            --text-color: #f3f0ff;
+            --text-muted: #a69fcc;
+            --glow: 0 0 20px rgba(255, 79, 168, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 105, 180, 0.3) transparent;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 105, 180, 0.3);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 79, 168, 0.6);
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Glowing Background Blobs */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 0;
+            opacity: 0.4;
+        }
+        .blob-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--primary-pink);
+            top: -100px;
+            left: -100px;
+            animation: float 15s infinite alternate;
+        }
+        .blob-2 {
+            width: 500px;
+            height: 500px;
+            background: var(--primary-purple);
+            bottom: -150px;
+            right: -100px;
+            animation: float 20s infinite alternate-reverse;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(50px, 30px) scale(1.1); }
+            100% { transform: translate(-20px, -50px) scale(0.9); }
+        }
+
+        /* Main Chat Container */
+        .chat-container {
+            width: 90%;
+            max-width: 480px;
+            height: 85vh;
+            max-height: 750px;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), var(--glow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1;
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header styling */
+        .chat-header {
+            padding: 16px 20px;
+            background: rgba(15, 10, 35, 0.6);
+            border-bottom: 1px solid var(--panel-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar-container {
+            position: relative;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-pink), var(--primary-purple));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: 0 0 10px rgba(255, 79, 168, 0.4);
+        }
+
+        .online-badge {
+            width: 12px;
+            height: 12px;
+            background: #00ff66;
+            border: 2px solid #15102a;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            box-shadow: 0 0 8px #00ff66;
+        }
+
+        .header-text h2 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .header-text p {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .header-actions button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .header-actions button:hover {
+            background: rgba(255, 79, 168, 0.2);
+            border-color: var(--primary-pink);
+            box-shadow: var(--glow);
+        }
+
+        /* Message Area */
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            max-width: 80%;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            animation: messageSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        @keyframes messageSlide {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.received {
+            align-self: flex-start;
+        }
+
+        .message.sent {
+            align-self: flex-end;
+        }
+
+        .bubble {
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .message.received .bubble {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom-left-radius: 4px;
+            color: var(--text-color);
+        }
+
+        .message.sent .bubble {
+            background: linear-gradient(135deg, var(--primary-pink) 0%, var(--primary-purple) 100%);
+            border-bottom-right-radius: 4px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 79, 168, 0.2);
+        }
+
+        .timestamp {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            align-self: flex-end;
+            margin: 0 4px;
+        }
+
+        .message.sent .timestamp {
+            align-self: flex-end;
+        }
+
+        /* Input Area */
+        .chat-input-area {
+            padding: 16px 20px 24px;
+            background: rgba(15, 10, 35, 0.6);
+            border-top: 1px solid var(--panel-border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-input {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 30px;
+            color: var(--text-color);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary-pink);
+            box-shadow: 0 0 15px rgba(255, 79, 168, 0.15);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, var(--primary-pink), var(--primary-purple));
+            border: none;
+            color: white;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 79, 168, 0.3);
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(255, 79, 168, 0.5);
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Typing Indicator Bubble */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        /* Config Modal styling */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .modal-content {
+            background: #15102a;
+            border: 1px solid var(--panel-border);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            padding: 24px;
+            box-shadow: var(--glow);
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            font-size: 1.2rem;
+            color: var(--primary-pink);
+        }
+
+        .modal-header button {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .form-group input {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-color);
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary-pink);
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, var(--primary-pink), var(--primary-purple));
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .save-btn:hover {
+            box-shadow: 0 4px 15px rgba(255, 79, 168, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="chat-container">
+        <!-- Header -->
+        <div class="chat-header">
+            <div class="user-info">
+                <div class="avatar-container">
+                    <div class="avatar">👧</div>
+                    <div class="online-badge"></div>
+                </div>
+                <div class="header-text">
+                    <h2>Muskan</h2>
+                    <p><i class="fa-solid fa-circle" style="color: #00ff66; font-size: 8px;"></i> Online</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button id="settings-trigger" title="API Settings"><i class="fa-solid fa-cog"></i></button>
+            </div>
+        </div>
+
+        <!-- Messages Area -->
+        <div class="chat-messages" id="chat-messages">
+            <!-- Initial Message -->
+            <div class="message received">
+                <div class="bubble">
+                    Hey there! I am Muskan. 😊 Sweet to meet you! How can I make you smile today?
+                </div>
+                <div class="timestamp">Just now</div>
+            </div>
+        </div>
+
+        <!-- Input Box Area -->
+        <div class="chat-input-area">
+            <div class="input-wrapper">
+                <input type="text" class="chat-input" id="chat-input" placeholder="Type a message..." autocomplete="off">
+            </div>
+            <button class="send-btn" id="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <!-- Configuration Modal -->
+    <div class="modal" id="settings-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>API Configuration</h3>
+                <button id="modal-close">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="api-url-input">API Endpoint URL</label>
+                <input type="text" id="api-url-input" placeholder="https://muskanchat-m95nb5wfg-vopem72125-1150s-projects.vercel.app/chat">
+                <small style="color: var(--text-muted); font-size: 0.75rem;">
+                    Vercel API URL: <code>https://muskanchat-m95nb5wfg-vopem72125-1150s-projects.vercel.app/chat</code>
+                </small>
+            </div>
+            <button class="save-btn" id="save-settings-btn" style="width: 100%;">Save & Apply</button>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const settingsTrigger = document.getElementById('settings-trigger');
+        const settingsModal = document.getElementById('settings-modal');
+        const modalClose = document.getElementById('modal-close');
+        const apiUrlInput = document.getElementById('api-url-input');
+        const saveSettingsBtn = document.getElementById('save-settings-btn');
+
+        // Migrate old local storage configuration
+        const savedUrl = localStorage.getItem('muskan_api_url');
+        if (savedUrl && (savedUrl.includes('192.168') || savedUrl.includes('127.0.0.1') || savedUrl.includes('localhost'))) {
+            localStorage.removeItem('muskan_api_url');
+        }
+
+        // Load or initialize API configuration
+        let apiUrl = localStorage.getItem('muskan_api_url');
+        if (!apiUrl) {
+            // If opened locally, use localhost. If hosted on Vercel, use relative /chat endpoint automatically.
+            if (window.location.protocol === 'file:') {
+                apiUrl = 'http://127.0.0.1:8000/chat';
+            } else {
+                apiUrl = '/chat';
+            }
+            localStorage.setItem('muskan_api_url', apiUrl);
+        }
+        apiUrlInput.value = apiUrl;
+
+        // Open/Close Modal
+        settingsTrigger.addEventListener('click', () => {
+            settingsModal.style.display = 'flex';
+        });
+
+        modalClose.addEventListener('click', () => {
+            settingsModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === settingsModal) {
+                settingsModal.style.display = 'none';
+            }
+        });
+
+        // Save Settings
+        saveSettingsBtn.addEventListener('click', () => {
+            const newUrl = apiUrlInput.value.trim();
+            if (newUrl) {
+                apiUrl = newUrl;
+                localStorage.setItem('muskan_api_url', apiUrl);
+                settingsModal.style.display = 'none';
+                appendStatusMessage("API URL updated successfully.");
+            }
+        });
+
+        // Append Status Message
+        function appendStatusMessage(text) {
+            const statusDiv = document.createElement('div');
+            statusDiv.style.alignSelf = 'center';
+            statusDiv.style.fontSize = '0.75rem';
+            statusDiv.style.color = 'var(--text-muted)';
+            statusDiv.style.background = 'rgba(255,255,255,0.03)';
+            statusDiv.style.padding = '4px 12px';
+            statusDiv.style.borderRadius = '12px';
+            statusDiv.style.margin = '4px 0';
+            statusDiv.innerText = text;
+            chatMessages.appendChild(statusDiv);
+            scrollToBottom();
+        }
+
+        // Scroll to Bottom
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Get Timestamp
+        function getFormattedTime() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            minutes = minutes < 10 ? '0'+minutes : minutes;
+            return hours + ':' + minutes + ' ' + ampm;
+        }
+
+        // Send message
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            // Clear input
+            chatInput.value = '';
+
+            // Render User Message
+            const userMsgDiv = document.createElement('div');
+            userMsgDiv.className = 'message sent';
+            userMsgDiv.innerHTML = `
+                <div class="bubble">${text}</div>
+                <div class="timestamp">${getFormattedTime()}</div>
+            `;
+            chatMessages.appendChild(userMsgDiv);
+            scrollToBottom();
+
+            // Render Typing Indicator
+            const indicatorDiv = document.createElement('div');
+            indicatorDiv.className = 'message received';
+            indicatorDiv.id = 'temp-indicator';
+            indicatorDiv.innerHTML = `
+                <div class="bubble">
+                    <div class="typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(indicatorDiv);
+            scrollToBottom();
+
+            // Fetch request
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: text })
+                });
+
+                // Remove typing indicator
+                document.getElementById('temp-indicator').remove();
+
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Render Muskan's Message
+                const botMsgDiv = document.createElement('div');
+                botMsgDiv.className = 'message received';
+                botMsgDiv.innerHTML = `
+                    <div class="bubble">${data.response || data.error || "No response received"}</div>
+                    <div class="timestamp">${getFormattedTime()}</div>
+                `;
+                chatMessages.appendChild(botMsgDiv);
+                scrollToBottom();
+
+            } catch (err) {
+                // Remove typing indicator
+                if (document.getElementById('temp-indicator')) {
+                    document.getElementById('temp-indicator').remove();
+                }
+
+                // Render Error Message
+                const errorMsgDiv = document.createElement('div');
+                errorMsgDiv.className = 'message received';
+                errorMsgDiv.innerHTML = `
+                    <div class="bubble" style="border-color: rgba(255, 0, 0, 0.3); background: rgba(255, 0, 0, 0.05); color: #ff6b6b;">
+                        Error connecting to API. Click the ⚙️ icon at the top to check your endpoint URL. (Error: ${err.message})
+                    </div>
+                    <div class="timestamp">${getFormattedTime()}</div>
+                `;
+                chatMessages.appendChild(errorMsgDiv);
+                scrollToBottom();
+            }
+        }
+
+        // Event Listeners for Input
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
