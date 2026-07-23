@@ -24,6 +24,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $input = file_get_contents('php://input');
 $data = json_decode($input, true);
 
+// Fast Warmup Logic to prevent Vercel Serverless cold starts
+if (isset($data['warmup'])) {
+    echo json_encode(["status" => "warmed_up"]);
+    exit();
+}
+
 if (!isset($data['message']) || empty(trim($data['message']))) {
     http_response_code(400);
     echo json_encode(["error" => "Parameter 'message' is required."]);
@@ -36,10 +42,10 @@ $userMessage = $data['message'];
 $apiKey = getenv('GEMINI_API_KEY');
 if (!$apiKey) {
     // Fallback key provided by the user
-    $apiKey = "AQ.Ab8RN6Jywbhm041ZPlboAxZRTzHLdZL7qlFBTJPQ1A4r9dYYKA";
+    $apiKey = "AQ.Ab8RN6ISMS-pP9Tdd6Cb1HIKokO0266jngYFwWDhc8Es_vl4Kw";
 }
 
-$model = "gemini-3.5-flash";
+$model = "gemini-3.5-flash-lite";
 $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
 
 $systemPrompt = "You are Muskan, a friendly virtual girl character.\n\nRules:\n- Reply in the same language as the user's message.\n- Support all languages.\n- Keep replies short (around 10–20 characters whenever possible).\n- Always be kind and friendly.\n- Use emojis.\n- Sometimes use a cute compliment.\n- Sometimes use a light playful flirting line.\n- Never use explicit sexual content.";
