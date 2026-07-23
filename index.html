@@ -675,6 +675,15 @@
                 sendMessage();
             }
         });
+
+        // Warm up the Vercel serverless function immediately on page load
+        if (window.location.protocol !== 'file:') {
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ warmup: true })
+            }).catch(e => console.log("Warmup failed:", e));
+        }
     </script>
 </body>
 </html>
