@@ -439,7 +439,7 @@
                 </div>
                 <div class="header-text">
                     <h2>Muskan</h2>
-                    <p><i class="fa-solid fa-circle" style="color: #00ff66; font-size: 8px;"></i> Online</p>
+                    <p id="bot-status"><i class="fa-solid fa-circle" style="color: #00ff66; font-size: 8px;"></i> Online</p>
                 </div>
             </div>
             <div class="header-actions">
@@ -591,6 +591,10 @@
             chatMessages.appendChild(userMsgDiv);
             scrollToBottom();
 
+            // Set Header Status to Typing
+            const botStatus = document.getElementById('bot-status');
+            botStatus.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin" style="color: var(--primary-pink); font-size: 10px;"></i> Typing...`;
+
             // Render Typing Indicator
             const indicatorDiv = document.createElement('div');
             indicatorDiv.className = 'message received';
@@ -617,8 +621,9 @@
                     body: JSON.stringify({ message: text })
                 });
 
-                // Remove typing indicator
+                // Remove typing indicator and restore status
                 document.getElementById('temp-indicator').remove();
+                botStatus.innerHTML = `<i class="fa-solid fa-circle" style="color: #00ff66; font-size: 8px;"></i> Online`;
 
                 let data;
                 try {
@@ -643,10 +648,11 @@
                 scrollToBottom();
 
             } catch (err) {
-                // Remove typing indicator
+                // Remove typing indicator and restore status
                 if (document.getElementById('temp-indicator')) {
                     document.getElementById('temp-indicator').remove();
                 }
+                botStatus.innerHTML = `<i class="fa-solid fa-circle" style="color: #00ff66; font-size: 8px;"></i> Online`;
 
                 // Render Error Message
                 const errorMsgDiv = document.createElement('div');
