@@ -1,4 +1,8 @@
 <?php
+// Disable error reporting to prevent warnings/notices from breaking JSON output
+error_reporting(0);
+ini_set('display_errors', 0);
+
 // Enable CORS
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
@@ -67,7 +71,6 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, [
 
 $response = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-curl_close($ch);
 
 if ($httpCode !== 200) {
     http_response_code($httpCode);
