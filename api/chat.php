@@ -36,7 +36,7 @@ $userMessage = $data['message'];
 $apiKey = getenv('GEMINI_API_KEY');
 if (!$apiKey) {
     // Fallback key provided by the user
-    $apiKey = "AQ.Ab8RN6Jywbhm041ZPlboAxZRTzHLdZL7qlFBTJPQ1A4r9dYYKA";
+    $apiKey = "AQ.Ab8RN6ISMS-pP9Tdd6Cb1HIKokO0266jngYFwWDhc8Es_vl4Kw";
 }
 
 $model = "gemini-3.5-flash";
@@ -74,10 +74,19 @@ $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
 if ($httpCode !== 200) {
     http_response_code($httpCode);
-    echo json_encode([
-        "error" => "Gemini API error",
-        "details" => json_decode($response, true) ?? $response
-    ]);
+    $errorDetails = json_decode($response, true);
+    
+    if ($httpCode === 401) {
+        echo json_encode([
+            "error" => "Muskan: Oh no! It seems your Gemini API key is missing or invalid on Vercel. Please add a valid GEMINI_API_KEY to your Vercel Project Environment Variables and redeploy.",
+            "details" => $errorDetails
+        ]);
+    } else {
+        echo json_encode([
+            "error" => "Gemini API error",
+            "details" => $errorDetails ?? $response
+        ]);
+    }
     exit();
 }
 
