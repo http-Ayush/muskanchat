@@ -36,7 +36,7 @@ $userMessage = $data['message'];
 $apiKey = getenv('GEMINI_API_KEY');
 if (!$apiKey) {
     // Fallback key provided by the user
-    $apiKey = "AQ.Ab8RN6ISMS-pP9Tdd6Cb1HIKokO0266jngYFwWDhc8Es_vl4Kw";
+    $apiKey = "AQ.Ab8RN6Jywbhm041ZPlboAxZRTzHLdZL7qlFBTJPQ1A4r9dYYKA";
 }
 
 $model = "gemini-3.5-flash";
@@ -57,11 +57,16 @@ $payload = [
         "parts" => [
             ["text" => $systemPrompt]
         ]
+    ],
+    "generationConfig" => [
+        "maxOutputTokens" => 60,
+        "temperature" => 0.7
     ]
 ];
 
 // Execute cURL request
 $ch = curl_init($url);
+curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
