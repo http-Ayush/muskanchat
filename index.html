@@ -476,9 +476,9 @@
             </div>
             <div class="form-group">
                 <label for="api-url-input">API Endpoint URL</label>
-                <input type="text" id="api-url-input" placeholder="https://muskanchat-m95nb5wfg-vopem72125-1150s-projects.vercel.app/chat">
+                <input type="text" id="api-url-input" placeholder="https://muskanchat.vercel.app/chat">
                 <small style="color: var(--text-muted); font-size: 0.75rem;">
-                    Vercel API URL: <code>https://muskanchat-m95nb5wfg-vopem72125-1150s-projects.vercel.app/chat</code>
+                    Vercel API URL: <code>https://muskanchat.vercel.app/chat</code>
                 </small>
             </div>
             <button class="save-btn" id="save-settings-btn" style="width: 100%;">Save & Apply</button>
@@ -620,11 +620,17 @@
                 // Remove typing indicator
                 document.getElementById('temp-indicator').remove();
 
-                if (!response.ok) {
-                    throw new Error(`HTTP Error: ${response.status}`);
+                let data;
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    // response was not JSON
                 }
 
-                const data = await response.json();
+                if (!response.ok) {
+                    const errMsg = (data && data.error) ? data.error : `HTTP Error: ${response.status}`;
+                    throw new Error(errMsg);
+                }
                 
                 // Render Muskan's Message
                 const botMsgDiv = document.createElement('div');
